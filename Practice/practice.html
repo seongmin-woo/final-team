@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Practice | 웹프로그루밍</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: #f4f4f4;
+        text-align: center;
+      }
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 40px;
+        margin-top: 40px;
+        font-size: 2.5em;
+      }
+      .quiz-container {
+        background: #fff;
+        margin-left: 500px;
+        margin-right: 500px;
+        padding: 30px;
+        margin-bottom: -50px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+      .question {
+        margin-bottom: 25px;
+      }
+      .question h3 {
+        font-size: 1.5em;
+        color: #34495e;
+        margin-bottom: 15px;
+      }
+      .options label {
+        display: block;
+        margin: 18px 0;
+        cursor: pointer;
+        padding: 12px 15px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        transition: background-color 0.3s ease, border-color 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .options label:hover {
+        background-color: #eef;
+        border-color: #cdd;
+      }
+      .options input[type='radio'] {
+        display: none;
+      }
+      /* 메인 퀴즈 또는 오답 다시 풀기 모드에서 선택된 옵션 스타일 */
+      .options input[type='radio']:checked + label {
+        background-color: #d4edda; /* 선택 시 밝은 초록색 배경 */
+        border-color: #28a745; /* 선택 시 초록색 테두리 */
+        color: #155724;
+        box-shadow: 0 0 0 2px #28a745 inset;
+      }
+      .short-answer input {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-top: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1em;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      .short-answer input:focus {
+        border-color: #28a745; /* 입력 필드 포커스 시 초록색 */
+        box-shadow: 0 0 8px rgba(40, 167, 69, 0.2);
+        outline: none;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: block;
+        margin: 25px auto 0;
+        font-size: 1.1em;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      button:hover {
+        background-color: #0056b3;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      }
+      /* 오답 다시 풀기 모드에서 '제출' 버튼 스타일 */
+      #submitBtnReview {
+        background-color: #28a745; /* 제출 버튼은 초록색 */
+      }
+      #submitBtnReview:hover {
+        background-color: #218838;
+      }
+      /* 피드백 결과 표시 영역 */
+      .result {
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        text-align: center;
+        font-size: 1.1em;
+        display: block; /* 필요할 때 보이도록 설정 */
+      }
+      .correct {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .incorrect {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .hint {
+        font-style: italic;
+        color: #856404;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        border-radius: 4px;
+        font-weight: normal;
+        text-align: left;
+        font-size: 0.95em;
+      }
+      /* 퀴즈 결과 요약 페이지 스타일 */
+      .summary-question {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #f7f7f7;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .summary-question h4 {
+        margin-top: 0;
+        color: #34495e;
+        font-size: 1.2em;
+        margin-bottom: 10px;
+      }
+      .summary-question p {
+        margin: 5px 0;
+      }
+      .summary-question .your-answer {
+        font-weight: bold;
+        color: #333;
+      }
+      .summary-question .correct-answer-text {
+        font-weight: bold;
+        color: #28a745;
+      }
+      .summary-question .incorrect-answer-text {
+        font-weight: bold;
+        color: #dc3545;
+      }
+      .summary-question .summary-hint {
+        font-style: italic;
+        color: #856404;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        border-radius: 4px;
+        font-weight: normal;
+        text-align: left;
+        font-size: 0.95em;
+      }
+      /* 푸터 */
+      .site-footer {
+        margin-top: 90px;
+        height: 270px;
+        background-color: #ededed;
+        padding: 60px;
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .site-footer .footer-text {
+        max-width: 800px;
+        margin: 0 auto 10px;
+        font-size: 14px;
+        color: #000000;
+      }
+
+      .site-footer .footer-logo {
+        width: 80px;
+        height: auto;
+        margin: 10px;
+      }
+
+      .site-footer .footer-locale {
+        color: #000000;
+        font-size: 14px;
+      }
+
+      /* 네비바 */
+      .nav-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 10px;
+        background-color: #ffffff;
+        font-family: 'Segoe UI', sans-serif;
+      }
+
+      .nav-logo {
+        padding-top: 10px;
+        padding-left: 50px;
+        display: flex;
+        align-items: center;
+      }
+
+      .logo {
+        width: 70px;
+        height: 60px;
+        margin-right: 8px;
+      }
+
+      .nav-menu {
+        display: flex;
+        padding-right: 50px;
+        gap: 20px;
+        font-size: 24px;
+      }
+
+      .nav-menu a {
+        color: #888;
+        text-decoration: none;
+      }
+
+      .nav-menu a:hover {
+        color: #000;
+        background: rgba(0, 0, 0, 0.04);
+        border-radius: 25%;
+      }
+
+      .nav-menu .disabled {
+        color: #ccc;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav-bar">
+      <div class="nav-logo">
+        <img src="/About/img/logo.png" class="logo" />
+      </div>
+
+      <nav class="nav-menu">
+        <a href="/index.html">HOME</a>
+        <a href="/About/about.html">ABOUT</a>
+        <a href="/Study/study.html">STUDY</a>
+        <a href="/Practice/practice.html">PRACTICE</a>
+        <a href="/Skill/skill.html">STACK</a>
+      </nav>
+    </header>
+    <h1>Practice</h1>
+    <div class="quiz-container" id="quiz">
+      <div id="question"></div>
+      <div id="options"></div>
+      <div id="result" style="display: none"></div>
+      <button onclick="nextQuestion()" style="display: none" id="nextBtn">
+        다음 문제
+      </button>
+      <button
+        onclick="checkAnswerReview()"
+        style="display: none"
+        id="submitBtnReview"
+      >
+        제출
+      </button>
+    </div>
+    <footer class="site-footer">
+      <p class="footer-text">
+        Web programming is the best group name that emerged during the web
+        programming course in the Information Security major at Joongbu
+        University, Goyang Campus, in the first semester of 2025.
+      </p>
+
+      <img src="/About/img/logo.png" class="footer-logo" />
+
+      <p class="footer-locale">
+        Copyright © 2025 WEBPROGROOMING. All Rights Reserved.
+      </p>
+    </footer>
+    <script>
+      // 퀴즈 문제 데이터 배열
+      const questions = [
+        {
+          type: 'multiple', // 문제 유형: 객관식
+          question: 'XSS 공격의 주요 목적은?', // 문제 내용
+          options: [
+            // 객관식 보기
+            '사용자의 브라우저에서 악성 스크립트를 실행',
+            '서버의 데이터베이스에 직접 접근',
+            '서버의 운영 체제를 손상',
+            '네트워크 트래픽을 가로채기',
+          ],
+          correct: 0, // 정답 인덱스 (0부터 시작)
+          hint: 'XSS는 클라이언트 측에서 실행되는 스크립트와 관련이 있습니다.', // 힌트
+        },
+        {
+          type: 'multiple',
+          question: 'CSRF를 방지하기 위한 가장 적합한 방법은?',
+          options: [
+            '입력 데이터 검증',
+            'CSRF 토큰 사용',
+            'HTTPS 강제',
+            '방화벽 설정',
+          ],
+          correct: 1,
+          hint: 'CSRF는 사용자를 속여 의도하지 않은 요청을 보내게 만드므로, 요청의 진위 여부를 확인하는 방법이 필요합니다.',
+        },
+        {
+          type: 'short', // 문제 유형: 단답형
+          question:
+            'SQL 인젝션 공격을 방지하기 위해 사용자 입력을 처리하는 가장 안전한 방법?',
+          correct: 'Prepared Statements', // 단답형 정답
+          hint: 'SQL 쿼리에 직접 사용자 입력을 삽입하는 대신, 미리 정의된 구조를 사용하는 방법을 생각해보세요.',
+        },
+        {
+          type: 'multiple',
+          question: '커맨드 인젝션 공격이 발생하는 원인은?',
+          options: [
+            '부적절한 입력 검증',
+            '암호화 부족',
+            '세션 관리 오류',
+            '브라우저 캐시',
+          ],
+          correct: 0,
+          hint: '커맨드 인젝션은 사용자가 입력한 데이터가 시스템 명령어로 실행될 때 발생합니다.',
+        },
+        {
+          type: 'short',
+          question:
+            'XSS 공격을 방지하기 위해 HTML 출력에서 사용자 입력을 처리하는 방법은?',
+          correct: 'HTML Escaping',
+          hint: '사용자 입력이 HTML로 렌더링될 때, 특수 문자를 안전한 형태로 변환하는 방법을 고려해보세요.',
+        },
+      ]
+
+      let currentQuestionIndex = 0 // 메인 퀴즈 흐름에서 현재 문제의 인덱스
+      let userAnswers = new Array(questions.length).fill(null) // 메인 퀴즈에서 사용자 답변 저장 (각 문제당 하나)
+      let incorrectQuestionsForReview = [] // 오답 다시 풀기에서 사용할, 틀린 문제 객체들을 저장하는 배열
+
+      let isReviewActive = false // 현재 오답 다시 풀기 모드인지 여부를 나타내는 플래그
+      let currentReviewQuestionIndex = 0 // 오답 다시 풀기 모드에서 현재 풀고 있는 문제의 인덱스
+      let reviewAttempts = 0 // 오답 다시 풀기 모드에서 현재 문제에 대한 틀린 시도 횟수 (힌트/정답 표시용)
+
+      // --- 메인 퀴즈 기능 (즉각적인 피드백 없음) ---
+
+      /**
+       * 현재 문제의 정보를 화면에 로드합니다.
+       * @param {number} questionIdx - 메인 questions 배열에서의 문제 인덱스.
+       * @param {boolean} isReviewMode - 현재 오답 다시 풀기 모드인지 여부.
+       * @param {object} reviewQuestionObject - 오답 다시 풀기 모드일 경우, 현재 풀어야 할 문제 객체.
+       */
+      function loadQuestion(
+        questionIdx,
+        isReviewMode = false,
+        reviewQuestionObject = null
+      ) {
+        // 현재 모드에 따라 문제 객체를 선택 (메인 퀴즈 vs 오답 다시 풀기)
+        const q = isReviewMode ? reviewQuestionObject : questions[questionIdx]
+        // 화면에 표시될 문제 번호 (오답 다시 풀기 모드에서는 1부터 다시 시작)
+        const displayIndex = isReviewMode
+          ? currentReviewQuestionIndex + 1
+          : questionIdx + 1
+
+        // 문제 내용 표시
+        document.getElementById(
+          'question'
+        ).innerHTML = `<h3>${displayIndex}. ${q.question}</h3>`
+        const optionsDiv = document.getElementById('options')
+        optionsDiv.innerHTML = ''
+        document.getElementById('result').style.display = 'none' // 결과 영역 숨기기
+        document.getElementById('nextBtn').style.display = 'none' // '다음 문제' 버튼 숨기기
+
+        if (isReviewMode) {
+          document.getElementById('submitBtnReview').style.display = 'block' // 오답 다시 풀기 모드에서는 '제출' 버튼 보이기
+          reviewAttempts = 0 // 새로운 오답 문제 로드 시 시도 횟수 초기화
+        } else {
+          document.getElementById('submitBtnReview').style.display = 'none' // 메인 퀴즈에서는 '제출' 버튼 숨기기
+        }
+
+        // 문제 유형에 따라 보기 또는 입력 필드 생성
+        // (오답 다시 풀기 모드에서는 `userAnswerInReview`를, 메인 퀴즈에서는 `userAnswers[questionIdx]`를 사용하여 이전 답변을 미리 채움)
+        const answerToPreFill = isReviewMode
+          ? q.userAnswerInReview
+          : userAnswers[questionIdx]
+
+        if (q.type === 'multiple') {
+          // 객관식 문제
+          q.options.forEach((option, index) => {
+            optionsDiv.innerHTML += `
+                        <div class="options">
+                            <input type="radio" name="answer" id="opt${index}" value="${index}" 
+                                ${
+                                  isReviewMode
+                                    ? ''
+                                    : 'onchange="storeAnswerAndShowNext(' +
+                                      questionIdx +
+                                      ', this.value)"'
+                                }
+                                ${
+                                  answerToPreFill !== null &&
+                                  String(answerToPreFill) === String(index)
+                                    ? 'checked'
+                                    : ''
+                                }>
+                            <label for="opt${index}">${option}</label>
+                        </div>`
+          })
+        } else {
+          // 단답형 문제
+          optionsDiv.innerHTML = `<div class="short-answer">
+                    <input type="text" id="shortAnswer" placeholder="답변을 입력하세요" 
+                        ${
+                          isReviewMode
+                            ? ''
+                            : 'onkeyup="storeAnswerAndShowNext(' +
+                              questionIdx +
+                              ', this.value)"'
+                        }
+                        value="${
+                          answerToPreFill !== null ? answerToPreFill : ''
+                        }">
+                </div>`
+        }
+
+        // 메인 퀴즈 모드에서만, 이전에 답변이 저장되어 있다면 '다음 문제' 버튼 보이기
+        if (
+          !isReviewMode &&
+          userAnswers[questionIdx] !== null &&
+          userAnswers[questionIdx] !== ''
+        ) {
+          document.getElementById('nextBtn').style.display = 'block'
+        }
+      }
+
+      /**
+       * 메인 퀴즈 모드에서 사용자의 답변을 저장하고 '다음 문제' 버튼을 표시합니다.
+       * 오답 다시 풀기 모드에서는 사용되지 않습니다.
+       * @param {number} questionIdx - 현재 문제의 인덱스.
+       * @param {string} answerValue - 사용자가 선택하거나 입력한 답변 값.
+       */
+      function storeAnswerAndShowNext(questionIdx, answerValue) {
+        userAnswers[questionIdx] = answerValue
+        document.getElementById('nextBtn').style.display = 'block'
+      }
+
+      /**
+       * 다음 문제로 진행하거나 퀴즈 요약 화면을 표시합니다.
+       */
+      function nextQuestion() {
+        // 오답 다시 풀기 모드가 아닐 경우(메인 퀴즈), 현재 문제에 대한 답변 유효성 검사
+        if (!isReviewActive) {
+          const currentQ = questions[currentQuestionIndex]
+          if (currentQ.type === 'multiple') {
+            const selected = document.querySelector(
+              `input[name="answer"]:checked`
+            )
+            if (!selected) {
+              alert('답변을 선택해주세요!')
+              return
+            }
+          } else {
+            // 단답형 문제
+            const shortAnswerInput = document.getElementById('shortAnswer')
+            if (!shortAnswerInput || shortAnswerInput.value.trim() === '') {
+              alert('답변을 입력해주세요!')
+              return
+            }
+          }
+        }
+
+        // 오답 다시 풀기 모드인 경우
+        if (isReviewActive) {
+          currentReviewQuestionIndex++ // 오답 문제 인덱스 증가
+          if (currentReviewQuestionIndex < incorrectQuestionsForReview.length) {
+            // 다음 오답 문제 로드
+            const nextReviewQ =
+              incorrectQuestionsForReview[currentReviewQuestionIndex]
+            loadQuestion(nextReviewQ.originalIndex, true, nextReviewQ)
+          } else {
+            // 모든 오답 문제를 다시 풀어봤을 경우 최종 요약 화면 표시
+            showFinalReviewSummary()
+          }
+        } else {
+          // 메인 퀴즈 진행
+          currentQuestionIndex++ // 메인 퀴즈 문제 인덱스 증가
+          if (currentQuestionIndex < questions.length) {
+            loadQuestion(currentQuestionIndex) // 다음 문제 로드
+          } else {
+            showQuizSummary() // 모든 문제 풀이 완료 시 퀴즈 요약 화면 표시
+          }
+        }
+      }
+
+      // --- 오답 다시 풀기 모드 전용 기능 (즉각적인 피드백 및 점진적 힌트) ---
+
+      /**
+       * 오답 다시 풀기 모드에서 '제출' 버튼 클릭 시 답변을 확인하고 피드백을 표시합니다.
+       * 힌트와 정답을 점진적으로 표시합니다.
+       */
+      function checkAnswerReview() {
+        const qData = incorrectQuestionsForReview[currentReviewQuestionIndex] // 현재 풀고 있는 오답 문제 데이터
+        const resultDiv = document.getElementById('result')
+        resultDiv.style.display = 'block' // 결과 영역 보이게 설정
+
+        let userAnswerValue
+        if (qData.type === 'multiple') {
+          // 객관식 문제
+          const selected = document.querySelector(
+            'input[name="answer"]:checked'
+          )
+          userAnswerValue = selected ? parseInt(selected.value) : null
+          if (userAnswerValue === null) {
+            resultDiv.innerHTML =
+              '<div class="incorrect">답변을 선택해주세요.</div>'
+            return // 답변이 없으면 함수 종료
+          }
+        } else {
+          // 단답형 문제
+          userAnswerValue = document.getElementById('shortAnswer').value.trim()
+          if (userAnswerValue === '') {
+            resultDiv.innerHTML =
+              '<div class="incorrect">답변을 입력해주세요.</div>'
+            return // 답변이 없으면 함수 종료
+          }
+        }
+
+        // 사용자의 답변이 정답인지 확인
+        const isCorrect =
+          (qData.type === 'multiple' &&
+            userAnswerValue === qData.correctAnswer) ||
+          (qData.type === 'short' &&
+            userAnswerValue.toLowerCase() === qData.correctAnswer.toLowerCase())
+
+        if (isCorrect) {
+          resultDiv.innerHTML = '<div class="correct">정답입니다!</div>'
+          document.getElementById('nextBtn').style.display = 'block' // 정답이면 '다음 문제' 버튼 보이기
+          document.getElementById('submitBtnReview').style.display = 'none' // '제출' 버튼 숨기기
+        } else {
+          reviewAttempts++ // 틀렸을 경우 시도 횟수 증가
+          let hintText = qData.hint
+          if (reviewAttempts >= 2) {
+            // 두 번 이상 틀렸을 경우 힌트와 정답 함께 표시
+            hintText += `<br>정답: <strong>${
+              qData.type === 'multiple'
+                ? qData.options[qData.correctAnswer]
+                : qData.correctAnswer
+            }</strong>`
+            document.getElementById('nextBtn').style.display = 'block' // 2번 틀렸으면 '다음 문제' 버튼 보이기
+            document.getElementById('submitBtnReview').style.display = 'none' // '제출' 버튼 숨기기
+          } else {
+            document.getElementById('nextBtn').style.display = 'none' // 아직 2번 안 틀렸으면 '다음 문제' 버튼 숨기기
+          }
+          resultDiv.innerHTML = `<div class="incorrect">오답입니다.</div><div class="hint">힌트 : ${hintText}</div>`
+        }
+        // 오답 다시 풀기 중 사용자의 현재 답변을 저장 (나중에 다시 이 문제를 풀 때를 대비)
+        qData.userAnswerInReview = userAnswerValue
+      }
+
+      // --- 퀴즈 요약 및 화면 전환 기능 ---
+
+      /**
+       * 퀴즈가 완료되면 전체 결과를 요약하여 표시합니다.
+       */
+      function showQuizSummary() {
+        isReviewActive = false // 오답 다시 풀기 모드 비활성화
+        const quizContainer = document.getElementById('quiz')
+        quizContainer.innerHTML = '<h2>퀴즈 결과</h2>'
+
+        let correctCount = 0
+        incorrectQuestionsForReview = [] // 새로운 요약을 위해 오답 문제 배열 초기화
+
+        questions.forEach((q, index) => {
+          let isCorrect
+          const userAnswer = userAnswers[index] // 메인 퀴즈에서 저장된 사용자 답변 사용
+
+          if (q.type === 'multiple') {
+            isCorrect = parseInt(userAnswer) === q.correct
+          } else {
+            // 단답형
+            isCorrect =
+              userAnswer && userAnswer.toLowerCase() === q.correct.toLowerCase()
+          }
+
+          if (isCorrect) {
+            correctCount++
+          } else {
+            // 틀린 문제를 `incorrectQuestionsForReview` 배열에 추가
+            incorrectQuestionsForReview.push({
+              originalIndex: index, // 원본 문제 인덱스 저장
+              question: q.question,
+              type: q.type,
+              options: q.options,
+              correctAnswer: q.correct,
+              userAnswer: userAnswer, // 사용자의 원래 틀린 답변
+              userAnswerInReview: null, // 오답 다시 풀기 시 답변 저장을 위한 초기화
+              hint: q.hint,
+            })
+          }
+        })
+
+        // 맞힌 문제 수 표시
+        quizContainer.innerHTML += `<p>총 ${questions.length}문제 중 <strong>${correctCount}문제</strong>를 맞혔습니다.</p>`
+
+        if (incorrectQuestionsForReview.length > 0) {
+          // 틀린 문제가 있을 경우 '다시 풀기' 버튼 표시
+          quizContainer.innerHTML += `<h3>틀린 문제 다시 풀어보기 (${incorrectQuestionsForReview.length}개)</h3>`
+          quizContainer.innerHTML += `<div id="incorrectQuestionsReview"></div>` // 이 div는 표시용이 아닌 구조를 위한 것
+          quizContainer.innerHTML += `<button onclick="startReviewMode()">다시 풀기 시작</button>`
+        } else {
+          // 모든 문제를 맞혔을 경우 메시지 표시
+          quizContainer.innerHTML += `<p>모든 문제를 맞혔습니다! 대단해요!</p>`
+        }
+        // 퀴즈 다시 시작 버튼 항상 표시
+        quizContainer.innerHTML += `<button onclick="restartQuiz()" style="margin-top: 30px;">퀴즈 다시 시작</button>`
+      }
+
+      /**
+       * 틀린 문제들을 다시 풀어보는 모드를 시작합니다.
+       */
+      function startReviewMode() {
+        if (incorrectQuestionsForReview.length === 0) {
+          alert('틀린 문제가 없습니다!')
+          restartQuiz() // 틀린 문제가 없으면 퀴즈 재시작을 제안
+          return
+        }
+        isReviewActive = true // 오답 다시 풀기 모드 활성화
+        currentReviewQuestionIndex = 0 // 오답 문제 인덱스 초기화
+
+        // 퀴즈 컨테이너를 오답 다시 풀기 모드에 맞게 재구성
+        document.getElementById('quiz').innerHTML = `
+                <div id="question"></div>
+                <div id="options"></div>
+                <div id="result"></div>
+                <button onclick="nextQuestion()" style="display: none;" id="nextBtn">다음 문제</button>
+                <button onclick="checkAnswerReview()" id="submitBtnReview">제출</button>
+            `
+        const firstReviewQ =
+          incorrectQuestionsForReview[currentReviewQuestionIndex]
+        // 첫 번째 오답 문제 로드 (오답 다시 풀기 모드임을 알림)
+        loadQuestion(firstReviewQ.originalIndex, true, firstReviewQ)
+      }
+
+      /**
+       * 모든 틀린 문제를 다시 풀어본 후 최종 요약 화면을 표시합니다.
+       */
+      function showFinalReviewSummary() {
+        isReviewActive = false // 오답 다시 풀기 모드 비활성화
+        const quizContainer = document.getElementById('quiz')
+        quizContainer.innerHTML = '<h2>오답 다시 풀기 완료!</h2>'
+        quizContainer.innerHTML +=
+          '<p>모든 틀린 문제를 다시 풀어보셨습니다.</p>'
+        quizContainer.innerHTML += `<button onclick="restartQuiz()">퀴즈 다시 시작</button>`
+      }
+
+      /**
+       * 퀴즈를 처음부터 다시 시작합니다. 모든 변수를 초기화하고 첫 문제를 로드합니다.
+       */
+      function restartQuiz() {
+        currentQuestionIndex = 0 // 메인 퀴즈 인덱스 초기화
+        userAnswers = new Array(questions.length).fill(null) // 사용자 답변 초기화
+        incorrectQuestionsForReview = [] // 오답 문제 배열 초기화
+        isReviewActive = false // 오답 다시 풀기 모드 비활성화
+        currentReviewQuestionIndex = 0 // 오답 문제 인덱스 초기화
+        reviewAttempts = 0 // 시도 횟수 초기화 (전체 퀴즈 재시작 시)
+
+        // 퀴즈 컨테이너를 초기 상태로 재구성
+        document.getElementById('quiz').innerHTML = `
+                <div id="question"></div>
+                <div id="options"></div>
+                <div id="result" style="display: none;"></div>
+                <button onclick="nextQuestion()" style="display: none;" id="nextBtn">다음 문제</button>
+                <button onclick="checkAnswerReview()" style="display: none;" id="submitBtnReview">제출</button>
+            `
+        loadQuestion(currentQuestionIndex) // 첫 문제 로드 (메인 퀴즈 시작)
+      }
+
+      // 페이지 로드 시 초기 퀴즈 시작
+      loadQuestion(currentQuestionIndex)
+    </script>
+  </body>
+</html>

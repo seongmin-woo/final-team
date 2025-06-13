@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Study | 웹프로그루밍</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="nav-bar">
+      <div class="nav-logo">
+        <img src="/About/img/logo.png" class="logo" />
+      </div>
+
+      <nav class="nav-menu">
+        <a href="/index.html">HOME</a>
+        <a href="/About/about.html">ABOUT</a>
+        <a href="/Study/study.html">STUDY</a>
+        <a href="/Practice/practice.html">PRACTICE</a>
+        <a href="/Skill/skill.html">STACK</a>
+      </nav>
+    </header>
+    <main>
+      <div class="slider-container">
+        <div class="slider-track" id="sliderTrack"></div>
+      </div>
+      <div class="main-content">
+        <div class="search-bar-wrap">
+          <form id="searchForm" class="search-form" autocomplete="off">
+            <img src="image/logo.png" alt="팀로고" class="search-logo" />
+            <input type="text" id="searchInput" placeholder="키워드 검색" />
+          </form>
+        </div>
+        <section class="card-list" id="cardList"></section>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <p class="footer-text">
+        Web programming is the best group name that emerged during the web
+        programming course in the Information Security major at Joongbu
+        University, Goyang Campus, in the first semester of 2025.
+      </p>
+
+      <img src="/About/img/logo.png" class="footer-logo" />
+
+      <p class="footer-locale">
+        Copyright © 2025 WEBPROGROOMING. All Rights Reserved.
+      </p>
+    </footer>
+    <button id="scrollTopBtn" class="scroll-top-btn" title="맨 위로 이동">
+      <img src="image/top.png" alt="맨 위로" />
+    </button>
+    <script src="main.js"></script>
+  </body>
+</html>
